@@ -5,22 +5,22 @@ use Nova\Tree\Node\Node;
 
 class Tree{
 
-	private $_root;
+	private $root;
 
-	private $_idKey = 'id';
+	private $idKey = 'id';
 
-	private $_parentKey = 'parentid';
+	private $parentKey = 'parentid';
 
-	private $_subKey = 'children';
+	private $subKey = 'children';
 
-	private $_sortKey = 'id';
+	private $sortKey = 'id';
 
-	private $_sort = SORT_ASC;
+	private $sort = SORT_ASC;
 
-	private $_modifyParent = true;
+	private $modifyParent = true;
 
 	//树结构
-	private $_nodes;
+	private $nodes;
 	/**
 	 *
 	 * @param mixed $data    数据
@@ -28,30 +28,30 @@ class Tree{
 	 */
 	public function __construct($data,$options=[]){
 		if(isset($options['root'])){
-			$this->_root = $options['root'];
+			$this->root = $options['root'];
 		}
 
 		if(isset($options['id'])){
-			$this->_idKey = $options['id'];
+			$this->idKey = $options['id'];
 		}
 
 		if(isset($options['parent']))
-			$this->_parentKey = $options['parent'];
+			$this->parentKey = $options['parent'];
 
 		if(isset($options['sub'])){
-			$this->_subKey = $options['sub'];
+			$this->subKey = $options['sub'];
 		}
 
 		if(isset($options['sortKey'])){
-			$this->_sortKey = $options['sortKey'];
+			$this->sortKey = $options['sortKey'];
 		}
 
 		if(isset($options['sort'])){
-			$this->_sort = $options['sort'];
+			$this->sort = $options['sort'];
 		}
 
 		if(isset($options['modifyParent'])){
-			$this->_modifyParent = $options['modifyParent'];
+			$this->modifyParent = $options['modifyParent'];
 		}
 
 		$this->build($data);
@@ -68,32 +68,37 @@ class Tree{
             throw new InvalidException('Data must be an array');
         }
 
-    	$data = array_combine(array_column($data,$this->_idKey),$data);
-	    $this->_nodes = [];
+        $ids = array_column($data,$this->idKey);
+        if(array_flip(array_flip($ids)) != $ids){
+        	throw new InvalidException('Id key must be different');
+        }
+
+    	$data = array_combine(array_column($data,$this->idKey),$data);
+	    $this->nodes = [];
 	    if(!empty($data)){
 	        foreach($data as $node){
-	            if(isset($data[$node[$this->_parentKey]])){
-	                $data[$node[$this->_parentKey]][$this->_subKey][] = &$data[$node[$this->_idKey]];
+	            if(isset($data[$node[$this->parentKey]])){
+	                $data[$node[$this->parentKey]][$this->subKey][] = &$data[$node[$this->idKey]];
 	            }else{
-	                $this->_nodes[] = &$data[$node[$this->_idKey]];
+	                $this->nodes[] = &$data[$node[$this->idKey]];
 	            }
 	        }
 	    }
 	    unset($data);
 
-        if(!empty($this->_root)){
-        	$nodes = $this->_root;
-        	foreach ($this->_nodes as $node) {
-        		if($this->_modifyParent)
-        			$node[$this->_parentKey] = $this->_root[$this->_idKey];
-        		$nodes[$this->_subKey][] = $node;
+        if(!empty($this->root)){
+        	$nodes = $this->root;
+        	foreach ($this->nodes as $node) {
+        		if($this->modifyParent)
+        			$node[$this->parentKey] = $this->root[$this->idKey];
+        		$nodes[$this->subKey][] = $node;
         	}
-        	$this->_nodes = $nodes;
+        	$this->nodes = $nodes;
         }
 	}
 
 	public function getNodes(){
-		return $this->_nodes;
+		return $this->nodes;
 	}
 
 	private function pr($var){
