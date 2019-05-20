@@ -93,11 +93,13 @@ class Tree{
 
         if(!empty($this->root)){
         	$nodes = $this->root;
-        	foreach ($this->nodes as $node) {
-        		if($this->modifyParent)
-        			$node[$this->parentKey] = $this->root[$this->idKey];
-        		$nodes[$this->subKey][] = $node;
-        	}
+        	if(!empty($this->nodes)){
+	        	foreach ($this->nodes as $node) {
+	        		if($this->modifyParent)
+	        			$node[$this->parentKey] = $this->root[$this->idKey];
+	        		$nodes[$this->subKey][] = $node;
+	        	}
+	        }
         	$this->nodes = $nodes;
         }
 	}
