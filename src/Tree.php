@@ -63,28 +63,33 @@ class Tree{
 	 * @param  array $data 数据
 	 * @return array
 	 */
-	private function build($data){
-		if (!is_array($data)) {
+	private function build($datas){
+		if (!is_array($datas)) {
             throw new InvalidException('Data must be an array');
         }
 
-        $ids = array_column($data,$this->idKey);
+        $ids = array_column($datas,$this->idKey);
         if(array_flip(array_flip($ids)) != $ids){
         	throw new InvalidException('Id key must be different');
         }
 
-    	$data = array_combine(array_column($data,$this->idKey),$data);
-	    $this->nodes = [];
-	    if(!empty($data)){
-	        foreach($data as $node){
-	            if(isset($data[$node[$this->parentKey]])){
-	                $data[$node[$this->parentKey]][$this->subKey][] = &$data[$node[$this->idKey]];
+    	$datas = array_combine(array_column($datas,$this->idKey),$datas);
+
+	    $nodes = [];
+	    if(!empty($datas)){
+	        foreach($datas as $data){
+	            if(isset($datas[$data[$this->parentKey]])){
+	            	$datas[$data[$this->idKey]][$this->subKey] = [];
+	                $datas[$data[$this->parentKey]][$this->subKey][] = &$datas[$data[$this->idKey]];
 	            }else{
-	                $this->nodes[] = &$data[$node[$this->idKey]];
+	            	$datas[$data[$this->idKey]][$this->subKey] = [];
+	                $nodes[] = &$datas[$data[$this->idKey]];
 	            }
 	        }
 	    }
-	    unset($data);
+	    $this->nodes = $nodes;
+	    unset($datas);
+	    unset($nodes);
 
         if(!empty($this->root)){
         	$nodes = $this->root;
